@@ -57,14 +57,17 @@ abstract class LanguageBase extends Command
             ->map(function (SplFileInfo $item) {
                 preg_match_all(
                     config ('artisan-language.scan_pattern',
-                        '/(@lang|__|\$t|\$tc)\s*(\(\s*[\'"])([^$]*[^.])([\'"].*)\)*/U'),
+                        '/(@lang|__|\$t|\$tc)\s*\([\'"]([^"\'\\\\]*(?:\\\\.[^"\'\\\\]*)*)[\'"]\)*/U'),
                     $item->getContents(),
                     $out,
                     PREG_PATTERN_ORDER);
-                return $out[3];
+                return $out[2];
             })
             ->collapse()
             ->unique()
+            ->map(function ($value){
+	            return stripslashes($value);
+            })
             ->filter(function ($value) {
                 return !$this->translator->has($value);
             })
